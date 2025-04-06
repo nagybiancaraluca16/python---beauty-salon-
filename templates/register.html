@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Înregistrare</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      background-color: #f8f8f8;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 30px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-top: 50px;
+    }
+    h2 {
+      text-align: center;
+      color: #ff4081;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #ff4081;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #e60073;
+    }
+    a {
+      color: #ff4081;
+      text-decoration: none;
+      font-size: 14px;
+      display: block;
+      text-align: center;
+      margin-top: 15px;
+    }
+    .flash-message {
+      color: #d9534f;
+      font-size: 14px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for message in messages %}
+            <p class="flash-message">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    <h2>Înregistrare</h2>
+
+    <!-- Flash message display -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-message">
+          <ul>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Registration Form -->
+    <form method="POST">
+      <label for="username">Nume utilizator:</label>
+      <input type="text" name="username" id="username" required placeholder="Introduceti numele utilizatorului" value="{{ request.form['username'] if request.method == 'POST' else '' }}">
+
+      <label for="email">Email:</label>
+      <input type="email" name="email" id="email" required placeholder="Introduceti email-ul" value="{{ request.form['email'] if request.method == 'POST' else '' }}">
+
+      <label for="password">Parolă:</label>
+      <input type="password" name="password" id="password" required placeholder="Introduceti parola">
+
+      <label for="confirm_password">Confirmă parola:</label>
+      <input type="password" name="confirm_password" id="confirm_password" required placeholder="Confirmă parola">
+
+      <button type="submit">Înregistrează-te</button>
+    </form>
+
+    <p>Ai deja un cont? <a href="{{ url_for('login') }}">Conectează-te aici</a></p>
+  </div>
+</body>
+</html>

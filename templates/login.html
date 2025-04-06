@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login - Beauty Salon</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for message in messages %}
+            <p class="flash-message">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    <h2>Login - Beauty Salon</h2>
+    <form method="POST">
+      <input type="text" name="username" placeholder="Username" required><br>
+      <input type="password" name="password" placeholder="Password" required><br>
+      <button type="submit">Login</button>
+    </form>
+    <p>Nu ai cont? <a href="{{ url_for('register') }}">Înregistrează-te aici</a></p>
+    <p>Ai uitat parola? <a href="{{ url_for('forgot_password') }}">Resetează parola</a></p>
+
+  </div>
+</body>
+</html>

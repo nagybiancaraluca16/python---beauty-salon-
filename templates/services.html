@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Selectează un serviciu - Beauty Salon</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .services-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .card {
+      background-color: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .card h3 {
+      margin-bottom: 10px;
+    }
+    .price {
+      font-size: 1.2em;
+      color: #888;
+      margin-bottom: 15px;
+    }
+    .book-btn {
+      padding: 10px 20px;
+      background-color: #ec407a;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .book-btn:hover {
+      background-color: #d81b60;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for message in messages %}
+            <p class="flash-message">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    <h2>Selectează un serviciu</h2>
+    <div class="services-container">
+      <div class="card">
+        <h3>Tuns</h3>
+        <p class="price">50 RON</p>
+        <form action="{{ url_for('book') }}" method="GET">
+          <input type="hidden" name="service" value="Tuns">
+          <button class="book-btn">Rezervă</button>
+        </form>
+      </div>
+      <div class="card">
+        <h3>Vopsit</h3>
+        <p class="price">120 RON</p>
+        <form action="{{ url_for('book') }}" method="GET">
+          <input type="hidden" name="service" value="Vopsit">
+          <button class="book-btn">Rezervă</button>
+        </form>
+      </div>
+      <div class="card">
+        <h3>Manichiura</h3>
+        <p class="price">70 RON</p>
+        <form action="{{ url_for('book') }}" method="GET">
+          <input type="hidden" name="service" value="Manichiura">
+          <button class="book-btn">Rezervă</button>
+        </form>
+      </div>
+      <div class="card">
+        <h3>Pedichiura</h3>
+        <p class="price">80 RON</p>
+        <form action="{{ url_for('book') }}" method="GET">
+          <input type="hidden" name="service" value="Pedichiura">
+          <button class="book-btn">Rezervă</button>
+        </form>
+      </div>
+      <div class="card">
+        <h3>Masaj</h3>
+        <p class="price">100 RON</p>
+        <form action="{{ url_for('book') }}" method="GET">
+          <input type="hidden" name="service" value="Masaj">
+          <button class="book-btn">Rezervă</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

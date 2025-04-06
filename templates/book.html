@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Programează Serviciu</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    select, input {
+      margin: 10px 0;
+      padding: 10px;
+      width: 90%;
+    }
+    .slot {
+      padding: 5px 10px;
+      margin: 5px;
+      background-color: #ec407a;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .slot:hover {
+      background-color: #d81b60;
+    }
+    .selected {
+      background-color: #d81b60 !important;
+    }
+    .calendar {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .calendar td {
+      padding: 10px;
+      cursor: pointer;
+      text-align: center;
+    }
+    .calendar td.disabled {
+      color: lightgray;
+      cursor: not-allowed;
+    }
+    .calendar td.booked {
+      background-color: #757575;
+      color: #ffffff;
+      cursor: not-allowed;
+    }
+    .flash-messages {
+      color: red;
+      font-size: 1.2em;
+      margin: 20px 0;
+      padding: 10px;
+      border: 1px solid red;
+      background-color: #f8d7da;
+    }
+
+    .flash-message {
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Programează un serviciu</h2>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for message in messages %}
+            <p class="flash-message">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('book') }}">
+      <!-- Service Selection -->
+      <label for="service">Serviciu:</label>
+      <select name="service" required id="service" onchange="this.form.submit()">
+      <option value="">Selectează serviciul</option>
+        {% for s in services %}
+        <option value="{{ s.id }}" {% if selected_service and selected_service.id == s.id %}selected{% endif %}>
+            {{ s.name }} - {{ s.price }} RON
+        </option>
+        {% endfor %}
+      </select><br>
+
+
+      
+
+
+      <!-- Employee Selection -->
+      {% if selected_service %}
+      <label for="employee">Angajat:</label>
+      <select name="employee" required id="employee">
+        <option value="">Selectează angajatul</option>
+        {% for emp in employees %}
+        <option value="{{ emp.id }}" {% if selected_employee == emp.id %}selected{% endif %}>{{ emp.name }} ({{ emp.specialty }})</option>
+        {% endfor %}
+      </select><br>
+      {% endif %}
+
+      <!-- Month Name Display -->
+      <h3>{{ month_name }} {{ current_year }}</h3>
+      <div>
+        <a href="{{ url_for('book', month=current_month-1, year=current_year) }}">Prev</a>
+        <a href="{{ url_for('book', month=current_month+1, year=current_year) }}">Next</a>
+      </div>
+      
+      <!-- Calendar -->
+      <table class="calendar">
+        {% for week in days_in_month %}
+        <tr>
+          {% for day in week %}
+          <td onclick="selectDate(this)" data-date="{{ current_year }}-{{ '%02d' % current_month }}-{{ '%02d' % day }}" 
+              {% if day == 0 %}class="disabled"{% endif %}
+              {% if day != 0 and (current_year ~ '-' ~ '%02d' % current_month ~ '-' ~ '%02d' % day) < (current_year ~ '-' ~ '%02d' % current_month ~ '-' ~ '%02d' % current_day) %}
+              class="disabled"{% endif %}
+              {% if day != 0 and (current_year ~ '-' ~ '%02d' % current_month ~ '-' ~ '%02d' % day) in booked_times %}
+              class="booked"{% endif %}>
+            {{ day if day != 0 else '' }}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </table>
+
+      <!-- Time Slot Selection -->
+      <h3>Selectează o oră:</h3>
+      <div>
+        {% for hour in ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'] %}
+        <span class="slot" onclick="selectTime(this)" data-time="{{ hour }}" id="hour-{{ hour }}" 
+              {% if hour in booked_times %} class="booked" {% endif %}>
+          {{ hour }}
+        </span>
+        {% endfor %}
+      </div>
+
+      <!-- Hidden Inputs for Date and Time -->
+      <input type="hidden" name="date" id="selected_date" required>
+      <input type="hidden" name="time" id="selected_time" required><br><br>
+
+      <!-- Submit Button -->
+      <button type="submit" name="confirm" id="confirmBtn">Confirmă Programarea</button>
+    </form>
+
+    {% if selected_service and selected_employee %}
+    <!-- Confirmation Form -->
+    <form action="{{ url_for('confirm_appointment') }}" method="GET">
+        <!-- Hidden inputs for service, date, time, and employee -->
+        <input type="hidden" name="service" value="{{ selected_service }}">
+        <input type="hidden" name="date" value="{{ selected_date }}">
+        <input type="hidden" name="time" value="{{ selected_time }}">
+        <input type="hidden" name="employee" value="{{ selected_employee }}">
+
+        <button type="submit">Confirmă Programarea</button>
+    </form>
+    {% endif %}
+
+    <p><a href="{{ url_for('dashboard') }}">Înapoi la Dashboard</a></p>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const bookedTimes = []; // Initialize an empty array to store booked times
+      const slots = document.querySelectorAll('.slot');
+
+      // Fetch booked times from the backend for the selected date
+      const selectedDate = document.getElementById('selected_date').value;
+      fetch(`/get_booked_times?date=${selectedDate}`)
+        .then(response => response.json())
+        .then(data => {
+          bookedTimes.push(...data); // Add the fetched booked times to the array
+          
+          slots.forEach(function (slot) {
+            const time = slot.dataset.time;
+
+            // Check if the time slot is booked
+            if (bookedTimes.includes(time)) {
+              slot.classList.add('booked');  // Add a 'booked' class to indicate the slot is already booked
+              slot.style.pointerEvents = 'none';  // Disable interaction with booked time slots
+            }
+          });
+        })
+        .catch(error => console.error('Error fetching booked times:', error));
+    });
+
+    // Select a date when clicked
+    function selectDate(cell) {
+      if (cell.classList.contains('disabled')) return; // Do nothing if it's disabled
+      document.querySelectorAll('td').forEach(c => c.classList.remove('selected'));
+      cell.classList.add('selected');
+      document.getElementById('selected_date').value = cell.dataset.date;
+    }
+
+    // Select a time slot when clicked
+    function selectTime(slot) {
+      if (slot.classList.contains('booked')) {
+        alert('This time slot is already booked.');
+        return;
+      }
+      document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+      slot.classList.add('selected');
+      document.getElementById('selected_time').value = slot.dataset.time;
+    }
+  </script>
+</body>
+</html>

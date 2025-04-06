@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard - Beauty Salon</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for message in messages %}
+            <p class="flash-message">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    <h2>Bine ai venit, {{ user.username }}!</h2>
+    <a href="{{ url_for('book') }}">Programează un serviciu</a> | 
+    <a href="{{ url_for('logout') }}">Logout</a>
+
+    <h3>Programările tale:</h3>
+    {% if appointments %}
+      <ul>
+        {% for appt in appointments %}
+          <li>
+            {{ appt.service }} la ora {{ appt.time }} pe {{ appt.date }}
+            cu {{ appt.employee.name if appt.employee else 'N/A' }}
+            <a href="{{ url_for('cancel_appointment', appointment_id=appt.id) }}" style="color:red;">Anulează</a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Nu ai programări încă.</p>
+    {% endif %}
+  </div>
+</body>
+</html>

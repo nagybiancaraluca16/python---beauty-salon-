@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Confirmare Programare</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .confirmation-box {
+      background-color: #fff0f6;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px auto;
+      width: 80%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .confirmation-box h2 {
+      margin-bottom: 10px;
+    }
+    .confirmation-box p {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+    .confirm-btn {
+      margin-top: 20px;
+      padding: 10px 25px;
+      background-color: #ec407a;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .confirm-btn:hover {
+      background-color: #d81b60;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for message in messages %}
+            <p class="flash-message">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="confirmation-box">
+      <h2>Confirmă programarea</h2>
+      <p><strong>Serviciu:</strong> {{ selected_service.name }} - {{ selected_service.price }} RON</p>
+      <p><strong>Data:</strong> {{ selected_date }}</p>
+      <p><strong>Ora:</strong> {{ selected_time }}</p>
+      <p><strong>Angajat:</strong> {{ selected_employee.name }}</p>
+
+      <form method="POST">
+        <button type="submit" class="confirm-btn">Confirmă Programarea</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

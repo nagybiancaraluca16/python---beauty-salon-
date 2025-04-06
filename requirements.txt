@@ -1,0 +1,8 @@
+flask
+flask_sqlalchemy
+flask_mail
+python-dotenv
+werkzeug
+itsdangerous
+gunicorn
+flask-cors

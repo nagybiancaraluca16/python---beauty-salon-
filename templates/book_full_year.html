@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Full Year Calendar</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    table.calendar {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    table.calendar th, table.calendar td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+    }
+    table.calendar td:hover {
+      background-color: #f8bbd0;
+    }
+    .selected {
+      background-color: #f06292 !important;
+      color: white;
+    }
+    .slot {
+      padding: 5px 10px;
+      margin: 5px;
+      background-color: #ec407a;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .slot:hover {
+      background-color: #d81b60;
+    }
+    .month-navigation {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .month-navigation button {
+      padding: 10px;
+      margin: 10px;
+      cursor: pointer;
+    }
+    .month-label {
+      font-size: 24px;
+      font-weight: bold;
+    }
+  </style>
+  <script>
+    let selectedDate = null;
+    let selectedTime = null;
+    let currentMonth = 3; // Start from April (0-indexed, so 3 is April)
+    
+    function selectDate(cell) {
+      const previouslySelected = document.querySelector('.selected');
+      if (previouslySelected) {
+        previouslySelected.classList.remove('selected');
+      }
+      cell.classList.add('selected');
+      selectedDate = cell.dataset.date;
+      document.getElementById('selected_date').value = selectedDate;
+    }
+
+    function selectTime(slot) {
+      document.querySelectorAll('.slot').forEach(s => s.style.backgroundColor = '#ec407a');
+      slot.style.backgroundColor = '#d81b60';
+      selectedTime = slot.dataset.time;
+      document.getElementById('selected_time').value = selectedTime;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // Disable past dates
+      const today = new Date().toISOString().split('T')[0];
+      document.querySelectorAll('td[data-date]').forEach(cell => {
+        if (cell.dataset.date < today) {
+          cell.style.color = '#ccc';
+          cell.style.cursor = 'not-allowed';
+          cell.onclick = null;
+        }
+      });
+      renderCalendar();
+    });
+
+    function renderCalendar() {
+      const months = [
+        'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+
+      const daysInMonth = [
+        [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
+        [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+      ];
+
+      const isLeapYear = 2025 % 4 === 0 && (2025 % 100 !== 0 || 2025 % 400 === 0);
+      const daysInEachMonth = isLeapYear ? daysInMonth[1] : daysInMonth[0];
+      const currentMonthName = months[currentMonth];
+      const firstDay = new Date(2025, currentMonth, 1).getDay(); // Get the day of the week for the first day of the month
+      const monthContainer = document.getElementById('month-container');
+      monthContainer.innerHTML = '';
+
+      // Month label
+      const monthLabel = document.createElement('div');
+      monthLabel.classList.add('month-label');
+      monthLabel.innerText = `${currentMonthName} 2025`;
+      monthContainer.appendChild(monthLabel);
+
+      const monthTable = document.createElement('table');
+      const thead = document.createElement('thead');
+      const row = document.createElement('tr');
+      ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+        const th = document.createElement('th');
+        th.innerText = day;
+        row.appendChild(th);
+      });
+      thead.appendChild(row);
+      monthTable.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      let day = 1;
+      for (let week = 0; week < 6; week++) {
+        const weekRow = document.createElement('tr');
+        for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+          const cell = document.createElement('td');
+          if (week === 0 && dayOfWeek < firstDay || day > daysInEachMonth[currentMonth]) {
+            cell.innerHTML = '';
+          } else {
+            cell.innerHTML = day;
+            cell.dataset.date = `2025-${(currentMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+            cell.onclick = () => selectDate(cell);
+            day++;
+          }
+          weekRow.appendChild(cell);
+        }
+        tbody.appendChild(weekRow);
+        if (day > daysInEachMonth[currentMonth]) break;
+      }
+      monthTable.appendChild(tbody);
+      monthContainer.appendChild(monthTable);
+    }
+
+    function navigateMonth(direction) {
+      currentMonth += direction;
+      if (currentMonth < 0) currentMonth = 11;
+      if (currentMonth > 11) currentMonth = 0;
+      renderCalendar();
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for message in messages %}
+            <p class="flash-message">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <h2>Programează un serviciu</h2>
+
+    <div class="month-navigation">
+      <button onclick="navigateMonth(-1)">&#8592; Previous Month</button>
+      <button onclick="navigateMonth(1)">Next Month &#8594;</button>
+    </div>
+
+    <form method="POST">
+      <select name="service" required>
+        <option value="">Selectează serviciul</option>
+        <option value="Tuns">Tuns</option>
+        <option value="Vopsit">Vopsit</option>
+        <option value="Manichiura">Manichiura</option>
+        <option value="Pedichiura">Pedichiura</option>
+        <option value="Masaj">Masaj</option>
+      </select><br>
+
+      <h3>Selectează o dată:</h3>
+      <div id="month-container"></div>
+
+      <h3>Selectează o oră:</h3>
+      <div>
+        {% for hour in ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'] %}
+        <span class="slot" onclick="selectTime(this)" data-time="{{ hour }}">{{ hour }}</span>
+        {% endfor %}
+      </div>
+
+      <input type="hidden" name="date" id="selected_date" required>
+      <input type="hidden" name="time" id="selected_time" required><br><br>
+      <button type="submit">Confirmă</button>
+    </form>
+    <p><a href="{{ url_for('dashboard') }}">Înapoi la Dashboard</a></p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #fce4ec;
+    }
+    .cancel-link {
+      color: red;
+      text-decoration: underline;
+    }
+    select {
+      padding: 8px;
+      margin: 15px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for message in messages %}
+            <p class="flash-message">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <h2>Bine ai venit, {{ user.username }} (Admin)</h2>
+    <form method="GET" action="{{ url_for('admin_dashboard') }}">
+      <label for="service">Filtrează după serviciu:</label>
+      <select name="service" onchange="this.form.submit()">
+        <option value="">Toate</option>
+        {% for s in services %}
+          <option value="{{ s }}" {% if selected_service == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </form>
+
+    <h3>Toate programările:</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Client</th>
+          <th>Email</th>
+          <th>Serviciu</th>
+          <th>Angajat</th>
+          <th>Data</th>
+          <th>Ora</th>
+          <th>Acțiuni</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for appt in appointments %}
+        <tr>
+          <td>{{ appt.user.username }}</td>
+          <td>{{ appt.user.email }}</td>
+          <td>{{ appt.service }}</td>
+          <td>{{ appt.employee.name if appt.employee else 'N/A' }}</td>
+          <td>{{ appt.date }}</td>
+          <td>{{ appt.time }}</td>
+          <td><a href="{{ url_for('cancel_appointment', appointment_id=appt.id) }}" class="cancel-link">Anulează</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p><a href="{{ url_for('logout') }}">Logout</a></p>
+  </div>
+</body>
+</html>
