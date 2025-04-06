@@ -6,3 +6,4 @@ werkzeug
 itsdangerous
 gunicorn
 flask-cors
+boto3  
